@@ -6,7 +6,7 @@ const release = `/*
  */\n\n`;
 
 const copyright = `/*
- *  Copyright (C) 2018 Interpromotion <info@interpromotion.com>
+ *  Copyright (C) 2022 Interpromotion <info@interpromotion.com>
  *
  *  This file is part of Cookiebannerjs.
  *
@@ -30,6 +30,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-sass');
 	grunt.loadNpmTasks('grunt-contrib-cssmin');
+	grunt.loadNpmTasks('grunt-contrib-watch');
 
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
@@ -61,8 +62,32 @@ module.exports = function(grunt) {
 				src: 'build/css/cookiebanner.css',
 				dest: 'build/css/cookiebanner.min.css'
 			}
+		},
+		watch: {
+			grunt: { files: ['Gruntfile.js'] },
+
+			jshint: {
+				files: 'src/js/*.js',
+				tasks: ['jshint']
+			},
+
+			uglify: {
+				files: ['src/js/cookiebanner.js'],
+				tasks: ['uglify']
+			},
+
+			sass: {
+				files: 'src/scss/cookiebanner.scss',
+				tasks: ['sass']
+			},
+
+			cssmin: {
+				files: 'build/css/cookiebanner.css',
+				tasks: ['cssmin']
+			}
 		}
 	});
 
-	grunt.registerTask('default', ['jshint', 'uglify', 'sass', 'cssmin']);
+	grunt.registerTask('build', ['jshint', 'uglify', 'sass', 'cssmin']);
+	grunt.registerTask('default', ['build','watch']);
 };

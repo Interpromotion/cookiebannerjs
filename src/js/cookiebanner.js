@@ -35,14 +35,14 @@
 			var value = '; ' + document.cookie;
 			var parts = value.split('; ' + cookie + '=');
 
-			return parts.length != 2 ? undefined : parts.pop().split(';').shift();
+			return parts.length != 2 ? undefined : JSON.parse(parts.pop().split(';').shift());
 		},
 		setCookie: function(name, value, expiryDays, domain, path) {
 			var exdate = new Date();
 			exdate.setDate(exdate.getDate() + (expiryDays || 365));
 
 			var cookie = [
-				name + '=' + value,
+				name + '=' + JSON.stringify(value),
 				'expires=' + exdate.toUTCString(),
 				'path=' + (path || '/')
 			];
@@ -72,29 +72,66 @@
 	function CookieBanner(options){
 		self = this;
 		this.banner = null;
-		this.allowButton = null;
-		this.disallowButton = null;
-		this.allowCookieValue = "allow";
-		this.denyCookieValue = "deny";
+		this.popup = null;
 
 		var defaults = {
 			policyText: "",
 			policyUrl: "",
 			policyUrlText: "",
+			popupTitle: "",
+			popupDescription: "",
 			allowText: "Allow cookie",
+			customizeText: "Customize settings",
 			denyText: "Deny cookie",
+			acceptSelected: "Accept selected only cookie",
+			acceptAll: "Accept all cookie",
+			categories: {
+				necessary: {
+					title : 'Technical cookie',
+					description: 'These cookies are essential for the correct functioning of the website and to provide the service offered and requested by a user. User consent is not needed to use these type of cookies.',
+					consent: true,
+					blocked: true
+				}
+			},
 			cookieName: "cookie_allowed",
+
+			//Cookie banner customization
 			bannerClass: "intP_cookie-banner",
 			bannerHiddenClass: "intP_cookie-banner__close",
 			policyTextClass: "intP_cookie-banner_policy-text",
+			buttonsContainerClass: "intP_cookie-banner_buttons",
 			allowButtonClass: "intP_cookie-banner_allow",
+			customizeButtonClass: "intP_cookie-banner_customize",
 			denyButtonClass: "intP_cookie-banner_deny",
 			closingAnimationDuration: 500,
+
+			//Cookie popup customization
+			popupClass: "intP_cookie-popup",
+			descriptionPopupClass: "intP_cookie-popup_description",
+			titleDescriptionPopupClass: "intP_cookie-popup_description_title",
+			cookieListPopupClass: "intP_cookie-popup_list",
+			cookieCatPopupClass: "intP_cookie-popup_list_coockie-cat",
+			cookieCatHeaderPopupClass: "intP_cookie-popup_list_coockie-cat_header",
+			cookieTitleCatHeaderPopupClass: "intP_cookie-popup_list_coockie-cat_header_title",
+			cookieDetailsCatHeaderPopupClass: "intP_cookie-popup_list_coockie-cat_header_details",
+			cookieConsentCatHeaderPopupClass: "intP_cookie-popup_list_coockie-cat_header_consent",
+			cookieContentCatPopupClass: "intP_cookie-popup_list_coockie-cat_content",
+			cookieButtonsPopupClass: "intP_cookie-popup_buttons",
+			cookieAcceptSelectedButtonPopupClass: "intP_cookie-popup_buttons_accept-selected",
+			cookieAcceptAllButtonPopupClass: "intP_cookie-popup_buttons_accept-all",
+
+			//Events
 			onInitialized: function() {},
-			onStatusChanged: function(status) {}
+			onStatusChanged: function(consents) {}
 		};
 		
 		this.options = extend(defaults, options);
+		this.options.consents = {};
+
+		//Add consents object to this.options
+		for(var i in this.options.categories) {
+			this.options.consents[i] = this.options.categories[i].consent;
+		}
 
 		if(!CookieHelper.isCookieSet(this.options.cookieName)) {
 			this._draw();
@@ -105,7 +142,7 @@
 
 
 	//Prototype methods
-	CookieBanner.prototype._draw = function() {
+	CookieBanner.prototype._draw = function() {
 		//Cookie banner
 		this.banner = document.createElement("div");
 		this.banner.classList.add(this.options.bannerClass);
@@ -128,7 +165,7 @@
 
 		//Buttons container
 		var buttonsContainer = document.createElement("div");
-		buttonsContainer.classList.add("intP_cookie-banner_buttons");
+		buttonsContainer.classList.add(this.options.buttonsContainerClass);
 		this.banner.appendChild(buttonsContainer);
 
 		//Allow button
@@ -138,6 +175,14 @@
 		this.allowButton.innerHTML = this.options.allowText;
 		this.allowButton.addEventListener("click", this.allow);
 		buttonsContainer.appendChild(this.allowButton);
+
+		//Customize button
+		this.customizeButton = document.createElement("button");
+		this.customizeButton.classList.add(this.options.customizeButtonClass);
+		this.customizeButton.setAttribute("type", "button");
+		this.customizeButton.innerHTML = this.options.customizeText;
+		this.customizeButton.addEventListener("click", this.customize);
+		buttonsContainer.appendChild(this.customizeButton);
 
 		//Deny button
 		this.denyButton = document.createElement("button");
@@ -151,42 +196,228 @@
 		document.body.appendChild(this.banner);
 	};
 
+	//Create and show details popup
+	CookieBanner.prototype._draw_popup = function() {
+		if(this.banner !== null && self.banner !== undefined) {
+			self.banner.remove();
+		}
+
+		if(document.querySelector('.' + this.options.popupClass) !== null) {
+			document.querySelector('.' + this.options.popupClass).remove();
+		}
+
+		//Cookie popup
+		this.popup = document.createElement('div');
+		this.popup.classList.add(this.options.popupClass);
+
+		//Popup description
+		if(this.options.popupTitle !== "" || this.options.popupDescription !== "") {
+			var description = document.createElement('div');
+			description.classList.add(this.options.descriptionPopupClass);
+
+			if(this.options.popupTitle !== "") {
+				var description_title = document.createElement('h3');
+				description_title.classList.add(this.options.titleDescriptionPopupClass);
+				description_title.innerText = this.options.popupTitle;
+
+				description.appendChild(description_title);
+			}
+
+			if(this.options.popupDescription !== "") {
+				var description_content = document.createElement("p");
+
+				var policyText = "";
+
+				if(this.options.popupDescription.indexOf("{{policy_url}}") >= 0) {
+					policyText = this.options.popupDescription.replace("{{policy_url}}", "<a href=\"" + this.options.policyUrl + "\">" + this.options.policyUrlText + "</a>");
+				}
+				else {
+					policyText = this.options.popupDescription + (this.options.popupDescription.charAt(this.options.popupDescription.length - 1) == "." ? " " : ". ") + "<a href=\"" + this.options.policyUrl + "\">" + this.options.policyUrlText + "</a>";
+				}
+
+				description_content.innerHTML = policyText;
+
+				description.appendChild(description_content);
+			}
+
+			this.popup.appendChild(description);
+		}
+
+		//Cookie category list
+		var cookie_container = document.createElement('div');
+		cookie_container.classList.add(this.options.cookieListPopupClass);
+
+		/* jshint loopfunc: true */
+		for(var i in this.options.categories) {
+			//Cookie category
+			var cookie = document.createElement('div');
+			cookie.classList.add(this.options.cookieCatPopupClass);
+
+			//Cookie header
+			var cookie_header = document.createElement('div');
+			cookie_header.classList.add(this.options.cookieCatHeaderPopupClass);
+			cookie_header.innerHTML = "<h3 class=\"" + this.options.cookieTitleCatHeaderPopupClass + "\">" + this.options.categories[i].title + "</h3>";
+
+			//Cookie cat details btn
+			var cookie_details_btn = document.createElement('button');
+			cookie_details_btn.setAttribute('type', 'button');
+			cookie_details_btn.classList.add(this.options.cookieDetailsCatHeaderPopupClass);
+			cookie_details_btn.innerText = 'Details';
+			cookie_details_btn.addEventListener('click', function() {
+				this.parentNode.parentNode.classList.toggle('open');
+			});
+
+			cookie_header.appendChild(cookie_details_btn);
+
+			//Cookie cat consent btn
+			var cookie_consent_btn = document.createElement('button');
+			cookie_consent_btn.setAttribute('type', 'button');
+			cookie_consent_btn.setAttribute('category', i);
+
+			if(CookieHelper.isCookieSet(this.options.cookieName)) {
+				if(this._hasConsent(i)) {
+					cookie_consent_btn.classList.add('active');
+					this.options.consents[i] = true;
+				}
+			}
+			else if(this.options.categories[i].consent === true) {
+				cookie_consent_btn.classList.add('active');
+			}
+
+			if(this.options.categories[i].blocked === true) {
+				cookie_consent_btn.setAttribute('disabled', 'disabled');
+			}
+
+			cookie_consent_btn.classList.add(this.options.cookieConsentCatHeaderPopupClass);
+			cookie_consent_btn.addEventListener('click', function() {
+				this.classList.toggle('active');
+				self.options.consents[this.getAttribute('category')] = this.classList.contains('active');
+			});
+
+			cookie_header.appendChild(cookie_consent_btn);
+
+			cookie.appendChild(cookie_header);
+
+			var cookie_content = document.createElement('div');
+			cookie_content.classList.add(this.options.cookieContentCatPopupClass);
+			cookie_content.innerHTML = '<p>' + this.options.categories[i].description + '</p>';
+
+			cookie.appendChild(cookie_content);
+
+			cookie_container.append(cookie);
+
+			this.popup.appendChild(cookie_container);
+		}
+
+		//Accept buttons
+		var popup_buttons = document.createElement('div');
+		popup_buttons.classList.add(this.options.cookieButtonsPopupClass);
+
+		//Accept selected button
+		var accept_selected_btn = document.createElement('button');
+		accept_selected_btn.setAttribute('type', 'button');
+		accept_selected_btn.classList.add(this.options.cookieAcceptSelectedButtonPopupClass);
+		accept_selected_btn.innerText = this.options.acceptSelected;
+		accept_selected_btn.addEventListener('click', function() {
+			self.setStatus(self.options.consents);
+
+			self.popup.remove();
+		});
+
+		popup_buttons.appendChild(accept_selected_btn);
+
+		//Accept all button
+		var accept_all_btn = document.createElement('button');
+		accept_all_btn.setAttribute('type', 'button');
+		accept_all_btn.classList.add(this.options.cookieAcceptAllButtonPopupClass);
+		accept_all_btn.innerText = this.options.acceptAll;
+		accept_all_btn.addEventListener('click', function() {
+			for(var i in self.options.consents) {
+				self.options.consents[i] = true;
+			}
+
+			self.setStatus(self.options.consents);
+			self.popup.remove();
+		});
+
+		popup_buttons.appendChild(accept_all_btn);
+
+		this.popup.appendChild(popup_buttons);
+
+		//Append popup to <body>
+		document.body.appendChild(this.popup);
+	};
+
 	CookieBanner.prototype.allow = function() {
-		self.setStatus(self.allowCookieValue);
+		for(var i in self.options.consents) {
+			self.options.consents[i] = true;
+		}
+
+		self.setStatus(self.options.consents);
 	};
 
 	CookieBanner.prototype.deny = function() {
-		self.setStatus(self.denyCookieValue);
-	};
-
-	CookieBanner.prototype.setStatus = function(status) {
-		if (status == self.allowCookieValue || status == self.denyCookieValue) {
-			CookieHelper.setCookie(self.options.cookieName, status, 365, "", "/");
-
-			self.options.onStatusChanged(status);
-
-			if(self.banner) {
-				self.banner.classList.add(self.options.bannerHiddenClass);
-
-				setTimeout(function() {
-					self.banner.remove();
-				}, self.options.closingAnimationDuration);
+		for(var i in self.options.categories) {
+			if(self.options.categories[i].blocked === true) {
+				self.options.consents[i] = true;
+			}
+			else {
+				self.options.consents[i] = false;
 			}
 		}
+
+		self.setStatus(self.options.consents);
+	};
+
+	CookieBanner.prototype.customize = function() {
+		self._draw_popup();
+
+		self.banner.classList.add(self.options.bannerHiddenClass);
+
+		setTimeout(function() {
+			self.banner.remove();
+		}, self.options.closingAnimationDuration);
+	};
+
+	CookieBanner.prototype.setStatus = function(consents) {
+		CookieHelper.setCookie(self.options.cookieName, consents, 365, "", "/");
+
+		self.options.onStatusChanged(consents);
+
+		if(self.banner) {
+			self.banner.classList.add(self.options.bannerHiddenClass);
+
+			setTimeout(function() {
+				self.banner.remove();
+			}, self.options.closingAnimationDuration);
+		}
+	};
+
+	CookieBanner.prototype._hasConsent = function(category) {
+		var cookie = CookieHelper.getCookie(self.options.cookieName);
+
+		if(cookie !== undefined) {
+			return cookie[category] === true ? true : false;
+		}
+
+		return false;
 	};
 
 	//Public methods
-	CookieBanner.hasConsent = function() {
-		return CookieHelper.getCookie(self.options.cookieName) === self.allowCookieValue;
+	CookieBanner.hasConsent = function(category) {
+		return self._hasConsent();
 	};
 
-	CookieBanner.changeStatus = function(status) {
-		if(status === true) {
-			this.prototype.setStatus(self.allowCookieValue);
-		}
-		else {
-			this.prototype.setStatus(self.denyCookieValue);
-		}
+	CookieBanner.getConsents = function() {
+		return CookieHelper.getCookie(self.options.cookieName);
+	};
+
+	CookieBanner.changeConsents = function(consents) {
+		this.setStatus(consents);
+	};
+
+	CookieBanner.showPopup = function() {
+		self._draw_popup();
 	};
 
 	window.CookieBanner = CookieBanner;
