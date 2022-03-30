@@ -66,6 +66,7 @@
   display: flex;
   background-color: transparent;
   padding: 10px;
+  box-shadow: none;
 }
 .intP_cookie-banner .intP_cookie-banner_buttons button.intP_cookie-banner_deny svg {
   width: 20px;
@@ -163,6 +164,11 @@
   align-items: center;
   margin-bottom: 15px;
 }
+.intP_cookie-popup .intP_cookie-popup_list .intP_cookie-popup_list_coockie-cat .intP_cookie-popup_list_coockie-cat_header button {
+  margin: 0;
+  padding: 0;
+  box-shadow: none;
+}
 .intP_cookie-popup .intP_cookie-popup_list .intP_cookie-popup_list_coockie-cat .intP_cookie-popup_list_coockie-cat_header .intP_cookie-popup_list_coockie-cat_header_title {
   margin: 0;
 }
@@ -222,6 +228,8 @@
 .intP_cookie-popup .intP_cookie-popup_buttons button {
   width: 25%;
   height: 50px;
+  margin: 0;
+  padding: 0;
 }
 .intP_cookie-popup .intP_cookie-popup_buttons button:first-child {
   margin-right: 20px;

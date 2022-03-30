@@ -72,6 +72,7 @@
                 display: flex;
                 background-color: transparent;
                 padding: 10px;
+                box-shadow: none;
 
                 svg{
                     width: 20px;
@@ -182,6 +183,12 @@
                 align-items: center;
                 margin-bottom: 15px;
 
+                button{
+                    margin: 0;
+                    padding: 0;
+                    box-shadow: none;
+                }
+
                 .intP_cookie-popup_list_coockie-cat_header_title{
                     margin: 0;
                 }
@@ -254,6 +261,8 @@
         button{
             width: 25%;
             height: 50px;
+            margin: 0;
+            padding: 0;
 
             &:first-child{
                 margin-right: 20px;

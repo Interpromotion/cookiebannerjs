@@ -198,8 +198,8 @@
 
 	//Create and show details popup
 	CookieBanner.prototype._draw_popup = function() {
-		if(this.banner !== null && self.banner !== undefined) {
-			self.banner.remove();
+		if(document.querySelector('.' + this.options.bannerClass) !== null) {
+			this.banner.remove();
 		}
 
 		if(document.querySelector('.' + this.options.popupClass) !== null) {
@@ -337,6 +337,7 @@
 			}
 
 			self.setStatus(self.options.consents);
+
 			self.popup.remove();
 		});
 
@@ -370,34 +371,32 @@
 	};
 
 	CookieBanner.prototype.customize = function() {
-		self._draw_popup();
-
 		self.banner.classList.add(self.options.bannerHiddenClass);
 
 		setTimeout(function() {
-			self.banner.remove();
+			self._draw_popup();
 		}, self.options.closingAnimationDuration);
 	};
 
 	CookieBanner.prototype.setStatus = function(consents) {
 		CookieHelper.setCookie(self.options.cookieName, consents, 365, "", "/");
 
-		self.options.onStatusChanged(consents);
+		this.options.onStatusChanged(consents);
 
-		if(self.banner) {
-			self.banner.classList.add(self.options.bannerHiddenClass);
+		if(document.querySelector('.' + this.options.bannerClass) !== null) {
+			this.banner.classList.add(this.options.bannerHiddenClass);
 
 			setTimeout(function() {
 				self.banner.remove();
-			}, self.options.closingAnimationDuration);
+			}, this.options.closingAnimationDuration);
 		}
 	};
 
 	CookieBanner.prototype._hasConsent = function(category) {
 		var cookie = CookieHelper.getCookie(self.options.cookieName);
 
-		if(cookie !== undefined) {
-			return cookie[category] === true ? true : false;
+		if(this.options.categories[category] !== undefined) {
+			return (this.options.categories[category].consent === true && this.options.categories[category].blocked === true) || (cookie !== undefined && cookie[category] === true);
 		}
 
 		return false;
@@ -405,7 +404,7 @@
 
 	//Public methods
 	CookieBanner.hasConsent = function(category) {
-		return self._hasConsent();
+		return self._hasConsent(category);
 	};
 
 	CookieBanner.getConsents = function() {
