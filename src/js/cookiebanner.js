@@ -119,6 +119,7 @@
 			cookieButtonsPopupClass: "intP_cookie-popup_buttons",
 			cookieAcceptSelectedButtonPopupClass: "intP_cookie-popup_buttons_accept-selected",
 			cookieAcceptAllButtonPopupClass: "intP_cookie-popup_buttons_accept-all",
+			closeButtonPopupClass: "intP_cookie-popup_close-btn",
 
 			//Events
 			onInitialized: function() {},
@@ -344,6 +345,19 @@
 		popup_buttons.appendChild(accept_all_btn);
 
 		this.popup.appendChild(popup_buttons);
+
+		//Close popup button
+		var close_btn = document.createElement('button');
+		close_btn.setAttribute('type', 'button');
+		close_btn.classList.add(this.options.closeButtonPopupClass);
+		close_btn.innerHTML = this.options.denyText;
+		close_btn.addEventListener("click", function() {
+			self.deny();
+
+			self.popup.remove();
+		});
+
+		this.popup.appendChild(close_btn);
 
 		//Append popup to <body>
 		document.body.appendChild(this.popup);

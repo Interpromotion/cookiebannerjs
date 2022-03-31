@@ -8,3 +8,6 @@
 
 ##v 0.2.1 - Mar 2022, 30th
 - Fix bugs
+
+##v 0.2.2 - Mar 2022, 31th
+- Add close button to preference's popup
