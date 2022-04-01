@@ -340,6 +340,33 @@
 
     @media screen and (max-width: 700px) {
 
+        .intP_cookie-popup_description{
+            padding-right: 40px;
+        }
+
+        .intP_cookie-popup_list{
+
+            .intP_cookie-popup_list_coockie-cat{
+                height: 85px;
+                margin: 20px 10px;
+
+                .intP_cookie-popup_list_coockie-cat_header{
+                    height: 70px;
+                    flex-wrap: wrap;
+
+                    .intP_cookie-popup_list_coockie-cat_header_title{
+                        font-size: 17px;
+                        width: 100%;
+                        margin-bottom: 10px;
+                    }
+
+                    .intP_cookie-popup_list_coockie-cat_header_details{
+                        margin-left: 0;
+                    }
+                }
+            }
+        }
+
         .intP_cookie-popup_buttons{
             justify-content: center;
             padding-right: 0;

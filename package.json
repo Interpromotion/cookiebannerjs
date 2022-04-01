@@ -3,7 +3,7 @@
   "description": "Pure javascript cookie banner opt-in plugin and AMD ready.",
   "author": "Interpromotion <info@interpromotion.com>",
   "main": "build/js/cookiebanner.min.js",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/interpromotion/cookiebannerjs.git"

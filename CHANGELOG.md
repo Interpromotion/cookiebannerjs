@@ -11,3 +11,6 @@
 
 ##v 0.2.2 - Mar 2022, 31th
 - Add close button to preference's popup
+
+##v 0.2.3 - apr 2022, 01st
+- Fix mobile screen layout bug in preference's popup
