@@ -14,3 +14,7 @@
 
 ##v 0.2.3 - apr 2022, 01st
 - Fix mobile screen layout bug in preference's popup
+
+##v 0.2.4 - apr 2022, 05th
+- Improve mobile screen usability in preference's popup
+- Add cookieCatDetailsText option to set cookie's category details button text

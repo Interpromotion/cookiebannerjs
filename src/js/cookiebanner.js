@@ -85,6 +85,7 @@
 			denyText: "Deny cookie",
 			acceptSelected: "Accept selected only cookie",
 			acceptAll: "Accept all cookie",
+			cookieCatDetailsText: "Details",
 			categories: {
 				necessary: {
 					title : 'Technical cookie',
@@ -263,7 +264,7 @@
 			var cookie_details_btn = document.createElement('button');
 			cookie_details_btn.setAttribute('type', 'button');
 			cookie_details_btn.classList.add(this.options.cookieDetailsCatHeaderPopupClass);
-			cookie_details_btn.innerText = 'Details';
+			cookie_details_btn.innerText = this.options.cookieCatDetailsText;
 			cookie_details_btn.addEventListener('click', function() {
 				this.parentNode.parentNode.classList.toggle('open');
 			});

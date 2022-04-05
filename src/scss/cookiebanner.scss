@@ -339,6 +339,7 @@
     }
 
     @media screen and (max-width: 700px) {
+        height: 85%;
 
         .intP_cookie-popup_description{
             padding-right: 40px;
@@ -368,12 +369,20 @@
         }
 
         .intP_cookie-popup_buttons{
+            flex-direction: column;
             justify-content: center;
-            padding-right: 0;
+            padding-right: 10px;
+            padding-left: 10px;
 
             button{
+                width: 100%;
                 height: auto;
                 padding: 5px;
+
+                &:first-child{
+                    margin-bottom: 10px;
+                    margin-right: 0;
+                }
             }
         }
     }
