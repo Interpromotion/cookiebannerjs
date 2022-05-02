@@ -18,3 +18,7 @@
 ##v 0.2.4 - apr 2022, 05th
 - Improve mobile screen usability in preference's popup
 - Add cookieCatDetailsText option to set cookie's category details button text
+
+##v 0.2.5 - may 2022, 2nd
+- Remove AMD compatibility
+- Fix bugs

@@ -1,8 +1,9 @@
+
 Cookiebannerjs
 =========
 
 
-This is a pure javascript cookie banner opt-in plugin and AMD ready.
+This is a pure javascript cookie banner opt-in plugin.
 
 ## INSTALL
 
@@ -27,23 +28,11 @@ Include the script into your page:
 Then initialize the plugin:
 <pre lang="javascript">
 !(function(){
-    new CookieBanner();
+    var cookieBanner = new CookieBanner();
 })();
 </pre>
 
-<b>CookieBanner object will be accessible from window.CookieBanner object</b>
-
 #### No parameter is mandatory.
-
-* * *
-
-### AMD USAGE
-You can also load Cookiebannerjs trought Requirejs:
-<pre lang="javascript">
-require(['cookiebannerjs'], function(CookieBanner){
-    new CookieBanner();
-});
-</pre>
 
 ## OPTIONS
 
@@ -99,30 +88,30 @@ Available events:
 
 ## API
 <pre lang="javascript">
-new CookieBanner({
+var cookieBanner = new CookieBanner({
     //whatever options and events override
 });
-
-/**
-* @return {Boolean} User consent to use cookie category
-*/
-window.CookieBanner.hasConsent(category);
-
-/**
-* @retrn {Object} User consent for each cookie category
-*/
-window.CookieBanner.getConsents();
 
 /**
 * Trigger user consent
 * @param {Object} User consent for each cookie category
 */
-window.CookieBanner.changeConsents(true);
+cookieBanner.setStatus(consents);
+
+/**
+* @return {Boolean} User consent to use cookie category
+*/
+cookieBanner.hasConsent(category);
+
+/**
+* @retrn {Object} User consent for each cookie category
+*/
+cookieBanner.getConsents();
 
 /**
 *Shows cookie consent preference popup
 */
-window.CookieBanner.showPopup();
+cookieBanner.showPopup();
 </pre>  
 
 ## BROWSER SUPPORT

@@ -27,6 +27,7 @@ const copyright = `/*
 module.exports = function(grunt) {
 
 	grunt.loadNpmTasks('grunt-contrib-jshint');
+	grunt.loadNpmTasks('grunt-esnext');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-sass');
 	grunt.loadNpmTasks('grunt-contrib-cssmin');
@@ -35,6 +36,9 @@ module.exports = function(grunt) {
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
 		jshint: {
+			options: {
+				"esnext": true
+			},
 			all: ['src/js/*.js']
 		},
 		uglify: {
